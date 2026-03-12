@@ -1,65 +1,263 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import Navbar from '@/components/Navbar';
+import { Button } from '@/components/ui/button';
+import { Textarea } from '@/components/ui/textarea';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Loader2 } from 'lucide-react';
+
+interface AnalysisResult {
+  overallScore: number;
+  strengths: string[];
+  improvements: string[];
+  atsOptimization: string[];
+  tailoredAdvice: string;
+}
 
 export default function Home() {
+  const [resumeText, setResumeText] = useState('');
+  const [targetRole, setTargetRole] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [error, setError] = useState('');
+
+  const analyzeResume = async () => {
+    if (resumeText.length < 100) {
+      setError('Please enter at least 100 characters of resume text');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setResult(null);
+
+    try {
+      const response = await fetch('http://localhost:5000/api/resume/analyze', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ resumeText, targetRole }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Analysis failed');
+      }
+
+      setResult(data.data);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to analyze resume. Make sure the backend is running.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600';
+    if (score >= 60) return 'text-blue-600';
+    if (score >= 40) return 'text-orange-600';
+    return 'text-red-600';
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      {/* Hero Section */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h1 className="text-4xl font-bold mb-2">AI Resume Analyzer</h1>
+          <p className="text-blue-100 text-lg">
+            Get instant feedback on your resume with AI-powered insights
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+      </div>
+
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Input Section */}
+          <Card className="h-fit">
+            <CardHeader>
+              <CardTitle>Upload Your Resume</CardTitle>
+              <CardDescription>
+                Paste your resume text below or upload a file for AI analysis
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <Label htmlFor="resume" className="text-sm font-medium">
+                  Resume Text *
+                </Label>
+                <Textarea
+                  id="resume"
+                  placeholder="Paste your resume here...&#10;&#10;Example:&#10;John Doe&#10;Software Engineer&#10;&#10;Experience:&#10;- Built scalable applications..."
+                  className="min-h-[300px] mt-2 font-mono text-sm"
+                  value={resumeText}
+                  onChange={(e) => setResumeText(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {resumeText.length} characters (minimum 100 required)
+                </p>
+              </div>
+
+              <div>
+                <Label htmlFor="role" className="text-sm font-medium">
+                  Target Role (Optional)
+                </Label>
+                <Input
+                  id="role"
+                  type="text"
+                  placeholder="e.g., Senior Frontend Developer"
+                  className="mt-2"
+                  value={targetRole}
+                  onChange={(e) => setTargetRole(e.target.value)}
+                />
+              </div>
+
+              <Button
+                onClick={analyzeResume}
+                disabled={loading || resumeText.length < 100}
+                className="w-full"
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing with AI...
+                  </>
+                ) : (
+                  'Analyze Resume'
+                )}
+              </Button>
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Results Section */}
+          <Card className="h-fit overflow-scroll max-h-[572px]">
+            <CardHeader>
+              <CardTitle>Analysis Results</CardTitle>
+              <CardDescription>
+                AI-powered insights and recommendations
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              {!result && !loading && (
+                <div className="text-center text-gray-500 py-16">
+                  <div className="text-6xl mb-4">📄</div>
+                  <p className="text-lg font-medium">No analysis yet</p>
+                  <p className="text-sm mt-2">
+                    Enter your resume and click analyze to see AI-powered insights
+                  </p>
+                </div>
+              )}
+
+              {loading && (
+                <div className="text-center py-16">
+                  <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
+                  <p className="mt-4 text-gray-600 font-medium">
+                    Analyzing with Gemini AI...
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    This usually takes 5-10 seconds
+                  </p>
+                </div>
+              )}
+
+              {result && (
+                <div className="space-y-6">
+                  {/* Overall Score */}
+                  <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
+                    <div className={`text-6xl font-bold ${getScoreColor(result.overallScore)}`}>
+                      {result.overallScore}
+                    </div>
+                    <p className="text-gray-600 font-medium mt-2">Overall Score</p>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {result.overallScore >= 80 && 'Excellent resume! 🎉'}
+                      {result.overallScore >= 60 && result.overallScore < 80 && 'Good foundation, room for improvement'}
+                      {result.overallScore >= 40 && result.overallScore < 60 && 'Needs significant improvements'}
+                      {result.overallScore < 40 && 'Major revisions recommended'}
+                    </p>
+                  </div>
+
+                  {/* Strengths */}
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <span className="text-green-600 text-xl">✓</span> 
+                      Strengths
+                    </h3>
+                    <ul className="space-y-2">
+                      {result.strengths.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700 bg-green-50 p-3 rounded-lg">
+                          <span className="text-green-600 font-bold mt-0.5">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Improvements */}
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <span className="text-orange-600 text-xl">⚠</span> 
+                      Areas to Improve
+                    </h3>
+                    <ul className="space-y-2">
+                      {result.improvements.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700 bg-orange-50 p-3 rounded-lg">
+                          <span className="text-orange-600 font-bold mt-0.5">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* ATS Optimization */}
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <span className="text-blue-600 text-xl">🤖</span> 
+                      ATS Optimization Tips
+                    </h3>
+                    <ul className="space-y-2">
+                      {result.atsOptimization.map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700 bg-blue-50 p-3 rounded-lg">
+                          <span className="text-blue-600 font-bold mt-0.5">•</span>
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Personalized Advice */}
+                  <div className="space-y-3">
+                    <h3 className="font-semibold text-lg flex items-center gap-2">
+                      <span className="text-purple-600 text-xl">💡</span> 
+                      Personalized Career Advice
+                    </h3>
+                    <div className="text-sm text-gray-700 bg-purple-50 p-4 rounded-lg whitespace-pre-line leading-relaxed">
+                      {result.tailoredAdvice}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
         </div>
-      </main>
+      </div>
     </div>
   );
 }
