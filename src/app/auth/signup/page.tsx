@@ -78,7 +78,7 @@ export default function SignUp() {
       if (signInResult?.error) {
         setError('Account created but sign in failed. Please sign in manually.');
       } else {
-        window.location.href = '/';
+        window.location.href = '/dashboard';
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create account');
@@ -88,7 +88,7 @@ export default function SignUp() {
   };
 
   const handleOAuthSignUp = async (provider: 'google' | 'github') => {
-    await signIn(provider, { callbackUrl: '/' });
+    await signIn(provider, { callbackUrl: '/dashboard' });
   };
 
   return (

@@ -29,14 +29,14 @@ export default function SignIn() {
     if (result?.error) {
       setError('Invalid email or password');
     } else {
-      window.location.href = '/';
+      window.location.href = '/dashboard';
     }
 
     setLoading(false);
   };
 
   const handleOAuthSignIn = async (provider: 'google' | 'github') => {
-    await signIn(provider, { callbackUrl: '/' });
+    await signIn(provider, { callbackUrl: '/dashboard' });
   };
 
   return (
