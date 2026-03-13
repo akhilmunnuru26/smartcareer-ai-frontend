@@ -120,7 +120,7 @@ export default function SignIn() {
             </div>
 
             {error && (
-              <Alert variant="destructive">
+              <Alert variant="destructive"  className="text-red-600">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
             )}

@@ -8,6 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
+import FileUpload from '@/components/FileUpload';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; 
+
+
 
 interface AnalysisResult {
   overallScore: number;
@@ -29,6 +33,7 @@ export default function Home() {
       setError('Please enter at least 100 characters of resume text');
       return;
     }
+
 
     setLoading(true);
     setError('');
@@ -58,6 +63,11 @@ export default function Home() {
     }
   };
 
+  const handleTextExtracted = (text: string) => {
+    setResumeText(text);
+    setError('');
+  };
+
   const getScoreColor = (score: number) => {
     if (score >= 80) return 'text-green-600';
     if (score >= 60) return 'text-blue-600';
@@ -82,7 +92,7 @@ export default function Home() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           
           {/* Input Section */}
-          <Card className="h-fit">
+          {/* <Card className="h-fit">
             <CardHeader>
               <CardTitle>Upload Your Resume</CardTitle>
               <CardDescription>
@@ -142,7 +152,87 @@ export default function Home() {
                 </Alert>
               )}
             </CardContent>
+          </Card> */}
+          <Card className="h-fit">
+            <CardHeader>
+              <CardTitle>Upload Your Resume</CardTitle>
+              <CardDescription>
+                Upload a file or paste your resume text below
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Add Tabs for Upload vs Paste */}
+              <Tabs defaultValue="upload">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="upload">Upload File</TabsTrigger>
+                  <TabsTrigger value="paste">Paste Text</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="upload" className="space-y-4">
+                  <FileUpload 
+                    onTextExtracted={handleTextExtracted}
+                    maxSize={10}
+                  />
+                  {resumeText && (
+                    <Alert className="bg-green-50 border-green-200">
+                      <AlertDescription className="text-green-800">
+                        ✅ Text extracted successfully ({resumeText.length} characters)
+                      </AlertDescription>
+                    </Alert>
+                  )}
+                </TabsContent>
+
+                <TabsContent value="paste">
+                  <Textarea
+                    placeholder="Paste your resume here...&#10;&#10;Example:&#10;John Doe&#10;Software Engineer&#10;&#10;Experience:&#10;- Built scalable applications..."
+                    className="min-h-[300px] font-mono text-sm"
+                    value={resumeText}
+                    onChange={(e) => setResumeText(e.target.value)}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    {resumeText.length} characters (minimum 100 required)
+                  </p>
+                </TabsContent>
+              </Tabs>
+
+              <div>
+                <Label htmlFor="role" className="text-sm font-medium">
+                  Target Role (Optional)
+                </Label>
+                <Input
+                  id="role"
+                  type="text"
+                  placeholder="e.g., Senior Frontend Developer"
+                  className="mt-2"
+                  value={targetRole}
+                  onChange={(e) => setTargetRole(e.target.value)}
+                />
+              </div>
+
+              <Button
+                onClick={analyzeResume}
+                disabled={loading || resumeText.length < 100}
+                className="w-full"
+                size="lg"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Analyzing with AI...
+                  </>
+                ) : (
+                  'Analyze Resume'
+                )}
+              </Button>
+
+              {error && (
+                <Alert variant="destructive">
+                  <AlertDescription>{error}</AlertDescription>
+                </Alert>
+              )}
+            </CardContent>
           </Card>
+
 
           {/* Results Section */}
           <Card className="h-fit overflow-scroll max-h-[572px]">
