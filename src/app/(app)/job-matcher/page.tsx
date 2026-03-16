@@ -41,7 +41,14 @@ export default function JobMatcher() {
     setResult(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/job/match', {
+      // const response = await fetch('http://localhost:5000/api/job/match', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ resumeText, jobDescription }),
+      // });
+      const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/job/match', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -49,6 +56,7 @@ export default function JobMatcher() {
         body: JSON.stringify({ resumeText, jobDescription }),
       });
 
+      
       const data = await response.json();
 
       if (!response.ok) {

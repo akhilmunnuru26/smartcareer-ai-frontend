@@ -270,9 +270,14 @@ export default function HistoryPage() {
       }
 
       try {
+        // const response = await fetch(
+        //   `http://localhost:5000/api/resume/history/${session.user.id}?page=1&limit=20`
+        // );
         const response = await fetch(
-          `http://localhost:5000/api/resume/history/${session.user.id}?page=1&limit=20`
+          `https://smartcareer-ai-backend.onrender.com/api/resume/history/${session.user.id}?page=1&limit=20`
         );
+
+        // https://smartcareer-ai-backend.onrender.com
 
         if (!response.ok) {
           throw new Error('Failed to fetch history');

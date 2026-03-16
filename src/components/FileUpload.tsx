@@ -45,10 +45,15 @@ export default function FileUpload({
       const formData = new FormData();
       formData.append('file', uploadedFile);
 
-      const response = await fetch('http://localhost:5000/api/upload/extract', {
+      // const response = await fetch('http://localhost:5000/api/upload/extract', {
+      //   method: 'POST',
+      //   body: formData,
+      // });
+      const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/upload/extract', {
         method: 'POST',
         body: formData,
       });
+
 
       const data = await response.json();
 

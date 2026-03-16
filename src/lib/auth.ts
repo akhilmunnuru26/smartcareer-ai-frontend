@@ -25,7 +25,17 @@ export const authConfig: NextAuthConfig = {
 
         try {
           // Call backend API to verify credentials
-          const response = await fetch('http://localhost:5000/api/auth/signin', {
+          // const response = await fetch('http://localhost:5000/api/auth/signin', {
+          //   method: 'POST',
+          //   headers: {
+          //     'Content-Type': 'application/json',
+          //   },
+          //   body: JSON.stringify({
+          //     email: credentials.email,
+          //     password: credentials.password,
+          //   }),
+          // });
+          const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/auth/signin', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

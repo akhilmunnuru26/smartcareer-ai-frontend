@@ -76,7 +76,18 @@ export default function Home() {
     setResult(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/resume/analyze', {
+      // const response = await fetch('http://localhost:5000/api/resume/analyze', {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify({ 
+      //     resumeText, 
+      //     targetRole,
+      //     userId: session?.user?.id 
+      //   }),
+      // });
+      const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/resume/analyze', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,9 +95,12 @@ export default function Home() {
         body: JSON.stringify({ 
           resumeText, 
           targetRole,
-          userId: session?.user?.id // Add this - passes user ID to backend
+          userId: session?.user?.id 
         }),
       });
+
+      // https://smartcareer-ai-backend.onrender.com
+
 
       const data = await response.json();
 
@@ -203,8 +217,8 @@ export default function Home() {
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Add Tabs for Upload vs Paste */}
-              <Tabs defaultValue="upload">
-                <TabsList className="grid w-full grid-cols-2">
+              <Tabs defaultValue="upload" className='flex flex-col'>
+                <TabsList className="flex  justify-between bg-transparent mb-4">
                   <TabsTrigger value="upload">Upload File</TabsTrigger>
                   <TabsTrigger value="paste">Paste Text</TabsTrigger>
                 </TabsList>
