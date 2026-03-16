@@ -31,41 +31,7 @@ export default function Home() {
   const { data: session } = useSession(); 
 
 
-  // const analyzeResume = async () => {
-  //   if (resumeText.length < 100) {
-  //     setError('Please enter at least 100 characters of resume text');
-  //     return;
-  //   }
-
-
-  //   setLoading(true);
-  //   setError('');
-  //   setResult(null);
-
-  //   try {
-  //     const response = await fetch('http://localhost:5000/api/resume/analyze', {
-  //       method: 'POST',
-  //       headers: {
-  //         'Content-Type': 'application/json',
-  //       },
-  //       body: JSON.stringify({ resumeText, targetRole }),
-  //     });
-
-  //     const data = await response.json();
-
-  //     if (!response.ok) {
-  //       throw new Error(data.message || 'Analysis failed');
-  //     }
-
-  //     setResult(data.data);
-  //   } catch (err) {
-  //     setError(err instanceof Error ? err.message : 'Failed to analyze resume. Make sure the backend is running.');
-  //     console.error(err);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-    const analyzeResume = async () => {
+     const analyzeResume = async () => {
     if (resumeText.length < 100) {
       setError('Please enter at least 100 characters of resume text');
       return;
@@ -99,7 +65,7 @@ export default function Home() {
         }),
       });
 
-      // https://smartcareer-ai-backend.onrender.com
+      
 
 
       const data = await response.json();

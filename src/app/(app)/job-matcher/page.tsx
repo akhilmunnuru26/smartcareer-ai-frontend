@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2, TrendingUp, AlertCircle } from 'lucide-react';
 import { Progress } from "@/components/ui/progress";
+import { API_BASE_URL } from '@/utils/contants';
 
 interface MatchResult {
   matchPercentage: number;
@@ -41,14 +42,8 @@ export default function JobMatcher() {
     setResult(null);
 
     try {
-      // const response = await fetch('http://localhost:5000/api/job/match', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ resumeText, jobDescription }),
-      // });
-      const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/job/match', {
+      
+      const response = await fetch(`${API_BASE_URL}/api/job/match`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

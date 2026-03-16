@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
+import { API_BASE_URL } from '@/utils/contants';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -45,20 +46,9 @@ export default function SignupPage() {
     setLoading(true);
 
     try {
-      // Call backend signup API
-      // const response = await fetch('http://localhost:5000/api/auth/signup', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     name: formData.name,
-      //     email: formData.email,
-      //     password: formData.password,
-      //   }),
-      // });
+     
 
-      const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/auth/signup', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

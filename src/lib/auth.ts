@@ -2,6 +2,7 @@ import type { NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import GitHub from "next-auth/providers/github";
 import Credentials from "next-auth/providers/credentials";
+import { API_BASE_URL } from "@/utils/contants";
 
 export const authConfig: NextAuthConfig = {
   providers: [
@@ -24,18 +25,8 @@ export const authConfig: NextAuthConfig = {
         }
 
         try {
-          // Call backend API to verify credentials
-          // const response = await fetch('http://localhost:5000/api/auth/signin', {
-          //   method: 'POST',
-          //   headers: {
-          //     'Content-Type': 'application/json',
-          //   },
-          //   body: JSON.stringify({
-          //     email: credentials.email,
-          //     password: credentials.password,
-          //   }),
-          // });
-          const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/auth/signin', {
+          
+          const response = await fetch(`${API_BASE_URL}/api/auth/signin`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',

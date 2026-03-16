@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Upload, FileText, Image as ImageIcon, X, Loader2 } from 'lucide-react';
+import { API_BASE_URL } from '@/utils/contants';
 
 interface FileUploadProps {
   onTextExtracted: (text: string) => void;
@@ -45,11 +46,8 @@ export default function FileUpload({
       const formData = new FormData();
       formData.append('file', uploadedFile);
 
-      // const response = await fetch('http://localhost:5000/api/upload/extract', {
-      //   method: 'POST',
-      //   body: formData,
-      // });
-      const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/upload/extract', {
+      
+      const response = await fetch(`${API_BASE_URL}/api/upload/extract`, {
         method: 'POST',
         body: formData,
       });

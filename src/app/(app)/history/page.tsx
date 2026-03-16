@@ -247,6 +247,7 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { FileText, Target, TrendingUp, Clock, Trash2, Loader2 } from 'lucide-react';
+import { API_BASE_URL } from '@/utils/contants';
 
 interface ResumeAnalysis {
   id: string;
@@ -270,15 +271,12 @@ export default function HistoryPage() {
       }
 
       try {
-        // const response = await fetch(
-        //   `http://localhost:5000/api/resume/history/${session.user.id}?page=1&limit=20`
-        // );
+       
         const response = await fetch(
-          `https://smartcareer-ai-backend.onrender.com/api/resume/history/${session.user.id}?page=1&limit=20`
+          `${API_BASE_URL}/api/resume/history/${session.user.id}?page=1&limit=20`
         );
 
-        // https://smartcareer-ai-backend.onrender.com
-
+       
         if (!response.ok) {
           throw new Error('Failed to fetch history');
         }
@@ -303,9 +301,11 @@ export default function HistoryPage() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/resume/analysis/${id}`, {
+     
+      const response = await fetch(`${API_BASE_URL}/api/resume/analysis/${id}`, {
         method: 'DELETE',
       });
+      
 
       if (response.ok) {
         // Remove from local state

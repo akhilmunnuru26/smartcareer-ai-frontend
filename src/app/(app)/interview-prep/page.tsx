@@ -14,6 +14,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { API_BASE_URL } from '@/utils/contants';
 
 interface Question {
   question: string;
@@ -52,15 +53,9 @@ export default function InterviewPrep() {
     setCurrentQuestionIndex(0);
 
     try {
-      // const response = await fetch('http://localhost:5000/api/interview/generate', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ role, difficulty }),
-      // });
+     
 
-      const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/interview/generate', {
+      const response = await fetch(`${API_BASE_URL}/api/interview/generate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,18 +91,8 @@ export default function InterviewPrep() {
     setFeedback(null);
 
     try {
-      // const response = await fetch('http://localhost:5000/api/interview/evaluate', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({
-      //     question: questions[currentQuestionIndex].question,
-      //     answer,
-      //     role,
-      //   }),
-      // });
-      const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/interview/evaluate', {
+      
+      const response = await fetch(`${API_BASE_URL}/api/interview/evaluate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
