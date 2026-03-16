@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Loader2 } from 'lucide-react';
 import FileUpload from '@/components/FileUpload';
+import { useSession } from 'next-auth/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; 
 
 
@@ -27,13 +28,48 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [error, setError] = useState('');
+  const { data: session } = useSession(); 
 
-  const analyzeResume = async () => {
+
+  // const analyzeResume = async () => {
+  //   if (resumeText.length < 100) {
+  //     setError('Please enter at least 100 characters of resume text');
+  //     return;
+  //   }
+
+
+  //   setLoading(true);
+  //   setError('');
+  //   setResult(null);
+
+  //   try {
+  //     const response = await fetch('http://localhost:5000/api/resume/analyze', {
+  //       method: 'POST',
+  //       headers: {
+  //         'Content-Type': 'application/json',
+  //       },
+  //       body: JSON.stringify({ resumeText, targetRole }),
+  //     });
+
+  //     const data = await response.json();
+
+  //     if (!response.ok) {
+  //       throw new Error(data.message || 'Analysis failed');
+  //     }
+
+  //     setResult(data.data);
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : 'Failed to analyze resume. Make sure the backend is running.');
+  //     console.error(err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+    const analyzeResume = async () => {
     if (resumeText.length < 100) {
       setError('Please enter at least 100 characters of resume text');
       return;
     }
-
 
     setLoading(true);
     setError('');
@@ -45,7 +81,11 @@ export default function Home() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ resumeText, targetRole }),
+        body: JSON.stringify({ 
+          resumeText, 
+          targetRole,
+          userId: session?.user?.id // Add this - passes user ID to backend
+        }),
       });
 
       const data = await response.json();
@@ -62,6 +102,7 @@ export default function Home() {
       setLoading(false);
     }
   };
+
 
   const handleTextExtracted = (text: string) => {
     setResumeText(text);
