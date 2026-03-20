@@ -1,18 +1,22 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2 } from 'lucide-react';
-import FileUpload from '@/components/FileUpload';
-import { useSession } from 'next-auth/react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'; 
-
-
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2 } from "lucide-react";
+import FileUpload from "@/components/FileUpload";
+import { useSession } from "next-auth/react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface AnalysisResult {
   overallScore: number;
@@ -23,81 +27,68 @@ interface AnalysisResult {
 }
 
 export default function Home() {
-  const [resumeText, setResumeText] = useState('');
-  const [targetRole, setTargetRole] = useState('');
+  const [resumeText, setResumeText] = useState("");
+  const [targetRole, setTargetRole] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
-  const [error, setError] = useState('');
-  const { data: session } = useSession(); 
+  const [error, setError] = useState("");
+  const { data: session } = useSession();
 
-
-     const analyzeResume = async () => {
+  const analyzeResume = async () => {
     if (resumeText.length < 100) {
-      setError('Please enter at least 100 characters of resume text');
+      setError("Please enter at least 100 characters of resume text");
       return;
     }
 
     setLoading(true);
-    setError('');
+    setError("");
     setResult(null);
 
+    // console.log("🔍 Analyzing with userId:", session?.user?.id); // Add this debug log
+
     try {
-      // const response = await fetch('http://localhost:5000/api/resume/analyze', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: JSON.stringify({ 
-      //     resumeText, 
-      //     targetRole,
-      //     userId: session?.user?.id 
-      //   }),
-      // });
-      const response = await fetch('https://smartcareer-ai-backend.onrender.com/api/resume/analyze', {
-        method: 'POST',
+      const response = await fetch("http://localhost:5000/api/resume/analyze", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
-          resumeText, 
+        body: JSON.stringify({
+          resumeText,
           targetRole,
-          userId: session?.user?.id 
+          userId: session?.user?.id, // This MUST be here
         }),
       });
 
-      
-
-
       const data = await response.json();
+      console.log("📊 Analysis response:", data); // Add this debug log
 
       if (!response.ok) {
-        throw new Error(data.message || 'Analysis failed');
+        throw new Error(data.message || "Analysis failed");
       }
 
       setResult(data.data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to analyze resume. Make sure the backend is running.');
+      setError(err instanceof Error ? err.message : "Failed to analyze resume");
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-
   const handleTextExtracted = (text: string) => {
     setResumeText(text);
-    setError('');
+    setError("");
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-blue-600';
-    if (score >= 40) return 'text-orange-600';
-    return 'text-red-600';
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-blue-600";
+    if (score >= 40) return "text-orange-600";
+    return "text-red-600";
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">      
+    <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -111,7 +102,6 @@ export default function Home() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
           {/* Input Section */}
           {/* <Card className="h-fit">
             <CardHeader>
@@ -183,21 +173,22 @@ export default function Home() {
             </CardHeader>
             <CardContent className="space-y-4">
               {/* Add Tabs for Upload vs Paste */}
-              <Tabs defaultValue="upload" className='flex flex-col'>
+              <Tabs defaultValue="upload" className="flex flex-col">
                 <TabsList className="flex  justify-between bg-transparent mb-4">
                   <TabsTrigger value="upload">Upload File</TabsTrigger>
                   <TabsTrigger value="paste">Paste Text</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="upload" className="space-y-4">
-                  <FileUpload 
+                  <FileUpload
                     onTextExtracted={handleTextExtracted}
                     maxSize={10}
                   />
                   {resumeText && (
                     <Alert className="bg-green-50 border-green-200">
                       <AlertDescription className="text-green-800">
-                        ✅ Text extracted successfully ({resumeText.length} characters)
+                        ✅ Text extracted successfully ({resumeText.length}{" "}
+                        characters)
                       </AlertDescription>
                     </Alert>
                   )}
@@ -242,7 +233,7 @@ export default function Home() {
                     Analyzing with AI...
                   </>
                 ) : (
-                  'Analyze Resume'
+                  "Analyze Resume"
                 )}
               </Button>
 
@@ -253,7 +244,6 @@ export default function Home() {
               )}
             </CardContent>
           </Card>
-
 
           {/* Results Section */}
           <Card className="h-fit overflow-scroll max-h-[572px]">
@@ -269,7 +259,8 @@ export default function Home() {
                   <div className="text-6xl mb-4">📄</div>
                   <p className="text-lg font-medium">No analysis yet</p>
                   <p className="text-sm mt-2">
-                    Enter your resume and click analyze to see AI-powered insights
+                    Enter your resume and click analyze to see AI-powered
+                    insights
                   </p>
                 </div>
               )}
@@ -290,28 +281,42 @@ export default function Home() {
                 <div className="space-y-6">
                   {/* Overall Score */}
                   <div className="text-center p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg">
-                    <div className={`text-6xl font-bold ${getScoreColor(result.overallScore)}`}>
+                    <div
+                      className={`text-6xl font-bold ${getScoreColor(result.overallScore)}`}
+                    >
                       {result.overallScore}
                     </div>
-                    <p className="text-gray-600 font-medium mt-2">Overall Score</p>
+                    <p className="text-gray-600 font-medium mt-2">
+                      Overall Score
+                    </p>
                     <p className="text-sm text-gray-500 mt-1">
-                      {result.overallScore >= 80 && 'Excellent resume! 🎉'}
-                      {result.overallScore >= 60 && result.overallScore < 80 && 'Good foundation, room for improvement'}
-                      {result.overallScore >= 40 && result.overallScore < 60 && 'Needs significant improvements'}
-                      {result.overallScore < 40 && 'Major revisions recommended'}
+                      {result.overallScore >= 80 && "Excellent resume! 🎉"}
+                      {result.overallScore >= 60 &&
+                        result.overallScore < 80 &&
+                        "Good foundation, room for improvement"}
+                      {result.overallScore >= 40 &&
+                        result.overallScore < 60 &&
+                        "Needs significant improvements"}
+                      {result.overallScore < 40 &&
+                        "Major revisions recommended"}
                     </p>
                   </div>
 
                   {/* Strengths */}
                   <div className="space-y-3">
                     <h3 className="font-semibold text-lg flex items-center gap-2">
-                      <span className="text-green-600 text-xl">✓</span> 
+                      <span className="text-green-600 text-xl">✓</span>
                       Strengths
                     </h3>
                     <ul className="space-y-2">
                       {result.strengths.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700 bg-green-50 p-3 rounded-lg">
-                          <span className="text-green-600 font-bold mt-0.5">•</span>
+                        <li
+                          key={i}
+                          className="flex items-start gap-2 text-sm text-gray-700 bg-green-50 p-3 rounded-lg"
+                        >
+                          <span className="text-green-600 font-bold mt-0.5">
+                            •
+                          </span>
                           <span>{item}</span>
                         </li>
                       ))}
@@ -321,13 +326,18 @@ export default function Home() {
                   {/* Improvements */}
                   <div className="space-y-3">
                     <h3 className="font-semibold text-lg flex items-center gap-2">
-                      <span className="text-orange-600 text-xl">⚠</span> 
+                      <span className="text-orange-600 text-xl">⚠</span>
                       Areas to Improve
                     </h3>
                     <ul className="space-y-2">
                       {result.improvements.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700 bg-orange-50 p-3 rounded-lg">
-                          <span className="text-orange-600 font-bold mt-0.5">•</span>
+                        <li
+                          key={i}
+                          className="flex items-start gap-2 text-sm text-gray-700 bg-orange-50 p-3 rounded-lg"
+                        >
+                          <span className="text-orange-600 font-bold mt-0.5">
+                            •
+                          </span>
                           <span>{item}</span>
                         </li>
                       ))}
@@ -337,13 +347,18 @@ export default function Home() {
                   {/* ATS Optimization */}
                   <div className="space-y-3">
                     <h3 className="font-semibold text-lg flex items-center gap-2">
-                      <span className="text-blue-600 text-xl">🤖</span> 
+                      <span className="text-blue-600 text-xl">🤖</span>
                       ATS Optimization Tips
                     </h3>
                     <ul className="space-y-2">
                       {result.atsOptimization.map((item, i) => (
-                        <li key={i} className="flex items-start gap-2 text-sm text-gray-700 bg-blue-50 p-3 rounded-lg">
-                          <span className="text-blue-600 font-bold mt-0.5">•</span>
+                        <li
+                          key={i}
+                          className="flex items-start gap-2 text-sm text-gray-700 bg-blue-50 p-3 rounded-lg"
+                        >
+                          <span className="text-blue-600 font-bold mt-0.5">
+                            •
+                          </span>
                           <span>{item}</span>
                         </li>
                       ))}
@@ -353,7 +368,7 @@ export default function Home() {
                   {/* Personalized Advice */}
                   <div className="space-y-3">
                     <h3 className="font-semibold text-lg flex items-center gap-2">
-                      <span className="text-purple-600 text-xl">💡</span> 
+                      <span className="text-purple-600 text-xl">💡</span>
                       Personalized Career Advice
                     </h3>
                     <div className="text-sm text-gray-700 bg-purple-50 p-4 rounded-lg whitespace-pre-line leading-relaxed">

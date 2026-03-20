@@ -1,243 +1,3 @@
-// 'use client';
-
-// import { useState } from 'react';
-// import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-// import { Button } from '@/components/ui/button';
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-// import { Badge } from '@/components/ui/badge';
-// import { FileText, Target, TrendingUp, Clock, Trash2 } from 'lucide-react';
-
-// export default function HistoryPage() {
-//   // Mock data - we'll replace with real data later
-//   const [resumeHistory] = useState([
-//     {
-//       id: 1,
-//       date: '2026-03-12',
-//       score: 85,
-//       targetRole: 'Senior Frontend Developer',
-//     },
-//     {
-//       id: 2,
-//       date: '2026-03-10',
-//       score: 78,
-//       targetRole: 'Full-Stack Developer',
-//     },
-//   ]);
-
-//   const [interviewHistory] = useState([
-//     {
-//       id: 1,
-//       date: '2026-03-11',
-//       role: 'Frontend Developer',
-//       difficulty: 'Mid-Level',
-//       questionsAnswered: 5,
-//     },
-//   ]);
-
-//   const [jobMatchHistory] = useState([
-//     {
-//       id: 1,
-//       date: '2026-03-09',
-//       matchPercentage: 88,
-//       jobTitle: 'Senior React Developer',
-//     },
-//   ]);
-
-//   return (
-//     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-//       <div className="mb-8">
-//         <h1 className="text-4xl font-bold text-gray-900 mb-2">Analysis History</h1>
-//         <p className="text-xl text-gray-600">
-//           Review your past analyses and track your progress
-//         </p>
-//       </div>
-
-//       <Tabs defaultValue="resume" className="space-y-6">
-//         <TabsList className="grid w-full max-w-md grid-cols-3">
-//           <TabsTrigger value="resume">Resume</TabsTrigger>
-//           <TabsTrigger value="interview">Interview</TabsTrigger>
-//           <TabsTrigger value="jobs">Job Match</TabsTrigger>
-//         </TabsList>
-
-//         {/* Resume History */}
-//         <TabsContent value="resume" className="space-y-4">
-//           {resumeHistory.length === 0 ? (
-//             <Card>
-//               <CardContent className="py-12 text-center">
-//                 <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-//                 <p className="text-gray-600">No resume analyses yet</p>
-//                 <p className="text-sm text-gray-500 mt-2">
-//                   Analyze your first resume to see it here
-//                 </p>
-//               </CardContent>
-//             </Card>
-//           ) : (
-//             resumeHistory.map((item) => (
-//               <Card key={item.id} className="hover:shadow-lg transition-shadow">
-//                 <CardHeader>
-//                   <div className="flex items-start justify-between">
-//                     <div className="flex items-start gap-4">
-//                       <div className="bg-blue-100 p-3 rounded-lg">
-//                         <FileText className="h-6 w-6 text-blue-600" />
-//                       </div>
-//                       <div>
-//                         <CardTitle className="text-lg">
-//                           Resume Analysis
-//                         </CardTitle>
-//                         <CardDescription className="flex items-center gap-2 mt-1">
-//                           <Clock className="h-4 w-4" />
-//                           {new Date(item.date).toLocaleDateString('en-US', {
-//                             month: 'long',
-//                             day: 'numeric',
-//                             year: 'numeric',
-//                           })}
-//                         </CardDescription>
-//                       </div>
-//                     </div>
-//                     <div className="flex items-center gap-2">
-//                       <Badge variant="secondary" className="text-lg font-bold">
-//                         {item.score}/100
-//                       </Badge>
-//                       <Button variant="ghost" size="sm">
-//                         <Trash2 className="h-4 w-4 text-red-600" />
-//                       </Button>
-//                     </div>
-//                   </div>
-//                 </CardHeader>
-//                 <CardContent>
-//                   <div className="flex items-center justify-between">
-//                     <div className="text-sm text-gray-600">
-//                       Target Role: <span className="font-medium">{item.targetRole}</span>
-//                     </div>
-//                     <Button variant="outline" size="sm">
-//                       View Details
-//                     </Button>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             ))
-//           )}
-//         </TabsContent>
-
-//         {/* Interview History */}
-//         <TabsContent value="interview" className="space-y-4">
-//           {interviewHistory.length === 0 ? (
-//             <Card>
-//               <CardContent className="py-12 text-center">
-//                 <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-//                 <p className="text-gray-600">No interview sessions yet</p>
-//                 <p className="text-sm text-gray-500 mt-2">
-//                   Start practicing to see your history here
-//                 </p>
-//               </CardContent>
-//             </Card>
-//           ) : (
-//             interviewHistory.map((item) => (
-//               <Card key={item.id} className="hover:shadow-lg transition-shadow">
-//                 <CardHeader>
-//                   <div className="flex items-start justify-between">
-//                     <div className="flex items-start gap-4">
-//                       <div className="bg-purple-100 p-3 rounded-lg">
-//                         <Target className="h-6 w-6 text-purple-600" />
-//                       </div>
-//                       <div>
-//                         <CardTitle className="text-lg">
-//                           {item.role} Interview Practice
-//                         </CardTitle>
-//                         <CardDescription className="flex items-center gap-2 mt-1">
-//                           <Clock className="h-4 w-4" />
-//                           {new Date(item.date).toLocaleDateString('en-US', {
-//                             month: 'long',
-//                             day: 'numeric',
-//                             year: 'numeric',
-//                           })}
-//                         </CardDescription>
-//                       </div>
-//                     </div>
-//                     <Button variant="ghost" size="sm">
-//                       <Trash2 className="h-4 w-4 text-red-600" />
-//                     </Button>
-//                   </div>
-//                 </CardHeader>
-//                 <CardContent>
-//                   <div className="flex items-center justify-between">
-//                     <div className="flex gap-4 text-sm text-gray-600">
-//                       <span>
-//                         Difficulty: <span className="font-medium">{item.difficulty}</span>
-//                       </span>
-//                       <span>
-//                         Questions: <span className="font-medium">{item.questionsAnswered}</span>
-//                       </span>
-//                     </div>
-//                     <Button variant="outline" size="sm">
-//                       View Details
-//                     </Button>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             ))
-//           )}
-//         </TabsContent>
-
-//         {/* Job Match History */}
-//         <TabsContent value="jobs" className="space-y-4">
-//           {jobMatchHistory.length === 0 ? (
-//             <Card>
-//               <CardContent className="py-12 text-center">
-//                 <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-//                 <p className="text-gray-600">No job matches yet</p>
-//                 <p className="text-sm text-gray-500 mt-2">
-//                   Match a job description to see it here
-//                 </p>
-//               </CardContent>
-//             </Card>
-//           ) : (
-//             jobMatchHistory.map((item) => (
-//               <Card key={item.id} className="hover:shadow-lg transition-shadow">
-//                 <CardHeader>
-//                   <div className="flex items-start justify-between">
-//                     <div className="flex items-start gap-4">
-//                       <div className="bg-green-100 p-3 rounded-lg">
-//                         <TrendingUp className="h-6 w-6 text-green-600" />
-//                       </div>
-//                       <div>
-//                         <CardTitle className="text-lg">{item.jobTitle}</CardTitle>
-//                         <CardDescription className="flex items-center gap-2 mt-1">
-//                           <Clock className="h-4 w-4" />
-//                           {new Date(item.date).toLocaleDateString('en-US', {
-//                             month: 'long',
-//                             day: 'numeric',
-//                             year: 'numeric',
-//                           })}
-//                         </CardDescription>
-//                       </div>
-//                     </div>
-//                     <div className="flex items-center gap-2">
-//                       <Badge variant="secondary" className="text-lg font-bold">
-//                         {item.matchPercentage}%
-//                       </Badge>
-//                       <Button variant="ghost" size="sm">
-//                         <Trash2 className="h-4 w-4 text-red-600" />
-//                       </Button>
-//                     </div>
-//                   </div>
-//                 </CardHeader>
-//                 <CardContent>
-//                   <div className="flex items-center justify-end">
-//                     <Button variant="outline" size="sm">
-//                       View Details
-//                     </Button>
-//                   </div>
-//                 </CardContent>
-//               </Card>
-//             ))
-//           )}
-//         </TabsContent>
-//       </Tabs>
-//     </div>
-//   );
-// }
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -246,83 +6,188 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { FileText, Target, TrendingUp, Clock, Trash2, Loader2 } from 'lucide-react';
-import { API_BASE_URL } from '@/utils/contants';
+import { FileText, Target, TrendingUp, Clock, Trash2, Loader2, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
-interface ResumeAnalysis {
+interface ResumeAnalysisItem {
   id: string;
   targetRole: string | null;
   overallScore: number;
   createdAt: string;
 }
 
+interface Pagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
+
 export default function HistoryPage() {
-  const { data: session } = useSession();
-  const [resumeHistory, setResumeHistory] = useState<ResumeAnalysis[]>([]);
+  const { data: session, status } = useSession();
+  const [resumeHistory, setResumeHistory] = useState<ResumeAnalysisItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1,
+    limit: 10,
+    total: 0,
+    totalPages: 0,
+  });
 
-  // Fetch resume history
+  // Debug: Log session
   useEffect(() => {
-    const fetchHistory = async () => {
-      if (!session?.user?.id) {
-        setLoading(false);
-        return;
-      }
+    console.log('🔍 Session status:', status);
+    console.log('🔍 Session data:', session);
+    console.log('🔍 User ID:', session?.user?.id);
+  }, [session, status]);
 
-      try {
-       
-        const response = await fetch(
-          `${API_BASE_URL}/api/resume/history/${session.user.id}?page=1&limit=20`
-        );
+  useEffect(() => {
+    if (status === 'loading') {
+      console.log('⏳ Waiting for session to load...');
+      return;
+    }
 
-       
-        if (!response.ok) {
-          throw new Error('Failed to fetch history');
-        }
+    if (!session?.user?.id) {
+      console.log('❌ No user ID found in session');
+      setError('Please sign in to view history');
+      setLoading(false);
+      return;
+    }
 
-        const data = await response.json();
-        setResumeHistory(data.data);
-      } catch (err) {
-        console.error('Error fetching history:', err);
-        setError('Failed to load history');
-      } finally {
-        setLoading(false);
-      }
-    };
-
+    console.log('✅ User ID found, fetching history...');
     fetchHistory();
-  }, [session]);
+  }, [session, status, pagination.page]);
 
-  // Delete analysis
-  const handleDelete = async (id: string) => {
+  // const fetchHistory = async () => {
+  //   if (!session?.user?.id) {
+  //     console.log('❌ Cannot fetch - no user ID');
+  //     setError('Please sign in to view history');
+  //     setLoading(false);
+  //     return;
+  //   }
+
+  //   try {
+  //     setLoading(true);
+  //     const url = `http://localhost:5000/api/resume/history/${session.user.id}?page=${pagination.page}&limit=${pagination.limit}`;
+      
+  //     console.log('📡 Fetching from:', url);
+      
+  //     const response = await fetch(url);
+      
+  //     console.log('📡 Response status:', response.status);
+
+  //     if (!response.ok) {
+  //       throw new Error('Failed to fetch history');
+  //     }
+
+  //     const data = await response.json();
+  //     console.log('📊 History data:', data);
+      
+  //     setResumeHistory(data.data);
+  //     setPagination(data.pagination);
+  //     setError('');
+  //   } catch (err) {
+  //     console.error('❌ Fetch history error:', err);
+  //     setError(err instanceof Error ? err.message : 'Failed to load history');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+const fetchHistory = async () => {
+  if (!session?.user?.id) {
+    console.log('❌ Cannot fetch - no user ID');
+    setError('Please sign in to view history');
+    setLoading(false);
+    return;
+  }
+
+  try {
+    setLoading(true);
+    const url = `http://localhost:5000/api/resume/history/${session.user.id}?page=${pagination.page}&limit=${pagination.limit}`;
+    
+    // console.log('📡 Fetching from:', url);
+    
+    const response = await fetch(url);
+    
+    console.log('📡 Response status:', response.status);
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch history');
+    }
+
+    const data = await response.json();
+    console.log('📊 Full response:', JSON.stringify(data, null, 2)); // More detailed log
+    console.log('📊 Data array:', data.data);
+    console.log('📊 Data length:', data.data?.length);
+    console.log('📊 Pagination:', data.pagination);
+    
+    setResumeHistory(data.data || []); // Add fallback
+    setPagination(data.pagination);
+    setError('');
+  } catch (err) {
+    console.error('❌ Fetch history error:', err);
+    setError(err instanceof Error ? err.message : 'Failed to load history');
+  } finally {
+    setLoading(false);
+  }
+};
+
+  const deleteAnalysis = async (id: string) => {
     if (!confirm('Are you sure you want to delete this analysis?')) {
       return;
     }
 
     try {
-     
-      const response = await fetch(`${API_BASE_URL}/api/resume/analysis/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/resume/analysis/${id}`, {
         method: 'DELETE',
       });
-      
 
-      if (response.ok) {
-        // Remove from local state
-        setResumeHistory(resumeHistory.filter((item) => item.id !== id));
-      } else {
-        alert('Failed to delete analysis');
+      if (!response.ok) {
+        throw new Error('Failed to delete analysis');
       }
-    } catch (error) {
-      console.error('Delete error:', error);
+
+      // Refresh history
+      fetchHistory();
+    } catch (err) {
       alert('Failed to delete analysis');
+      console.error('Delete error:', err);
     }
   };
 
-  if (loading) {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  // Show loading while checking auth
+  if (status === 'loading') {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Loader2 className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-spin" />
+            <p className="text-gray-600">Checking authentication...</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Show error if not authenticated
+  if (!session) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>Please sign in to view your history</AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -334,16 +199,18 @@ export default function HistoryPage() {
         <p className="text-xl text-gray-600">
           Review your past analyses and track your progress
         </p>
+        
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 px-4 py-3 rounded mb-6">
-          {error}
-        </div>
+        <Alert variant="destructive" className="mb-6">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
-      <Tabs defaultValue="resume" className="space-y-6">
-        <TabsList className="grid w-full max-w-md grid-cols-3">
+      <Tabs defaultValue="resume" className="space-y-6 flex flex-col">
+        <TabsList className="grid w-[50%] max-w-md grid-cols-3">
           <TabsTrigger value="resume">Resume</TabsTrigger>
           <TabsTrigger value="interview">Interview</TabsTrigger>
           <TabsTrigger value="jobs">Job Match</TabsTrigger>
@@ -351,95 +218,124 @@ export default function HistoryPage() {
 
         {/* Resume History */}
         <TabsContent value="resume" className="space-y-4">
-          {resumeHistory.length === 0 ? (
+          {loading ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Loader2 className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-spin" />
+                <p className="text-gray-600">Loading history...</p>
+              </CardContent>
+            </Card>
+          ) : resumeHistory.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <FileText className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-600">No resume analyses yet</p>
-                <p className="text-sm text-gray-500 mt-2">
+                <p className="text-gray-600 mb-2">No resume analyses yet</p>
+                <p className="text-sm text-gray-500 mb-4">
                   Analyze your first resume to see it here
                 </p>
+                <Button onClick={() => window.location.href = '/resume-analyzer'}>
+                  Analyze Resume
+                </Button>
               </CardContent>
             </Card>
           ) : (
-            resumeHistory.map((item) => (
-              <Card key={item.id} className="hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-start gap-4">
-                      <div className="bg-blue-100 p-3 rounded-lg">
-                        <FileText className="h-6 w-6 text-blue-600" />
+            <>
+              {resumeHistory.map((item) => (
+                <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                  <CardHeader>
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start gap-4">
+                        <div className="bg-blue-100 p-3 rounded-lg">
+                          <FileText className="h-6 w-6 text-blue-600" />
+                        </div>
+                        <div>
+                          <CardTitle className="text-lg">
+                            {item.targetRole || 'Resume Analysis'}
+                          </CardTitle>
+                          <CardDescription className="flex items-center gap-2 mt-1">
+                            <Clock className="h-4 w-4" />
+                            {formatDate(item.createdAt)}
+                          </CardDescription>
+                        </div>
                       </div>
-                      <div>
-                        <CardTitle className="text-lg">Resume Analysis</CardTitle>
-                        <CardDescription className="flex items-center gap-2 mt-1">
-                          <Clock className="h-4 w-4" />
-                          {new Date(item.createdAt).toLocaleDateString('en-US', {
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                          })}
-                        </CardDescription>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-lg font-bold">
+                          {item.overallScore}/100
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteAnalysis(item.id)}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-600" />
+                        </Button>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="secondary" className="text-lg font-bold">
-                        {item.overallScore}/100
-                      </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="flex items-center justify-between">
+                      <div className="text-sm text-gray-600">
+                        Score: <span className="font-medium">{item.overallScore}/100</span>
+                      </div>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        onClick={() => handleDelete(item.id)}
+                        onClick={() => window.location.href = `/history/analysis/${item.id}`}
                       >
-                        <Trash2 className="h-4 w-4 text-red-600" />
+                        View Details
                       </Button>
                     </div>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-600">
-                      {item.targetRole ? (
-                        <>
-                          Target Role: <span className="font-medium">{item.targetRole}</span>
-                        </>
-                      ) : (
-                        <span className="text-gray-400">No target role specified</span>
-                      )}
-                    </div>
-                    <Button variant="outline" size="sm" asChild>
-                      <a href={`/resume-analyzer?analysisId=${item.id}`}>View Details</a>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
+                  </CardContent>
+                </Card>
+              ))}
+
+              {/* Pagination */}
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-center gap-2 mt-6">
+                  <Button
+                    variant="outline"
+                    onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
+                    disabled={pagination.page === 1}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-gray-600">
+                    Page {pagination.page} of {pagination.totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
+                    disabled={pagination.page === pagination.totalPages}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </>
           )}
         </TabsContent>
 
         {/* Interview History - Coming Soon */}
-        <TabsContent value="interview" className="space-y-4">
+        <TabsContent value="interview">
           <Card>
             <CardContent className="py-12 text-center">
               <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No interview sessions yet</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Start practicing to see your history here
+              <p className="text-gray-600 mb-2">Interview history coming soon</p>
+              <p className="text-sm text-gray-500">
+                Practice interviews to see your history here
               </p>
             </CardContent>
           </Card>
         </TabsContent>
 
         {/* Job Match History - Coming Soon */}
-        <TabsContent value="jobs" className="space-y-4">
+        <TabsContent value="jobs">
           <Card>
             <CardContent className="py-12 text-center">
               <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600">No job matches yet</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Match a job description to see it here
+              <p className="text-gray-600 mb-2">Job match history coming soon</p>
+              <p className="text-sm text-gray-500">
+                Match job descriptions to see them here
               </p>
             </CardContent>
           </Card>
@@ -448,3 +344,27 @@ export default function HistoryPage() {
     </div>
   );
 }
+// ```
+
+// ---
+
+// ## **Step 2: Check Browser Console**
+
+// 1. Open browser DevTools (F12)
+// 2. Go to Console tab
+// 3. Refresh the history page
+// 4. Look for the debug logs starting with 🔍, 📡, 📊
+
+// **Tell me what you see in the console:**
+// - What is the session status?
+// - What is session.user.id?
+// - What URL is it trying to fetch from?
+// - What's the response?
+
+// ---
+
+// ## **Step 3: Check Backend Logs**
+
+// While the history page is open, check your backend terminal for logs. You should see something like:
+// ```
+// GET /api/resume/history/[some-id]?page=1&limit=10

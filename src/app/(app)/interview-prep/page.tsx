@@ -1,61 +1,58 @@
-"use client"
+'use client';
 
 import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CheckCircle, XCircle } from 'lucide-react';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { API_BASE_URL } from '@/utils/contants';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Loader2, Target, CheckCircle2, XCircle, Lightbulb } from 'lucide-react';
 
 interface Question {
   question: string;
-  difficulty: string;
   category: string;
+  // difficulty: string;
 }
 
-interface Feedback {
+interface Evaluation {
   score: number;
   strengths: string[];
   improvements: string[];
-  suggestion: string;
+  feedback: string;
 }
 
-export default function InterviewPrep() {
-  const [role, setRole] = useState('');
-  const [difficulty, setDifficulty] = useState('');
-  const [loading, setLoading] = useState(false);
+export default function InterviewPrepPage() {
+  // const { data: session } = useSession();
   const [questions, setQuestions] = useState<Question[]>([]);
+  const [role, setRole] = useState('');
+  const [difficulty, setDifficulty] = useState('mid');
+  
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answer, setAnswer] = useState('');
-  const [feedback, setFeedback] = useState<Feedback | null>(null);
+  const [evaluation, setEvaluation] = useState<Evaluation | null>(null);
+  const [loading, setLoading] = useState(false);
   const [evaluating, setEvaluating] = useState(false);
   const [error, setError] = useState('');
 
   const generateQuestions = async () => {
-    if (!role || !difficulty) {
-      setError('Please select both role and difficulty level');
+    if (!role.trim()) {
+      setError('Please enter a job role');
       return;
     }
 
     setLoading(true);
     setError('');
     setQuestions([]);
-    setFeedback(null);
     setCurrentQuestionIndex(0);
+    setAnswer('');
+    setEvaluation(null);
 
     try {
-     
-
-      const response = await fetch(`${API_BASE_URL}/api/interview/generate`, {
+      const response = await fetch('http://localhost:5000/api/interview/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,15 +60,17 @@ export default function InterviewPrep() {
         body: JSON.stringify({ role, difficulty }),
       });
 
-      // 
-
       const data = await response.json();
+      console.log("Generated questions response:", data);
 
       if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('Rate limit exceeded. You can generate 15 question sets per hour. Please try again later.');
+        }
         throw new Error(data.message || 'Failed to generate questions');
       }
 
-      setQuestions(data.data.questions);
+      setQuestions(data.questions);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to generate questions');
       console.error(err);
@@ -82,17 +81,16 @@ export default function InterviewPrep() {
 
   const evaluateAnswer = async () => {
     if (!answer.trim()) {
-      setError('Please provide an answer');
+      setError('Please enter your answer');
       return;
     }
 
     setEvaluating(true);
     setError('');
-    setFeedback(null);
+    setEvaluation(null);
 
     try {
-      
-      const response = await fetch(`${API_BASE_URL}/api/interview/evaluate`, {
+      const response = await fetch('http://localhost:5000/api/interview/evaluate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -105,12 +103,16 @@ export default function InterviewPrep() {
       });
 
       const data = await response.json();
+      console.log("Evaluation response of questions:", data);
 
       if (!response.ok) {
+        if (response.status === 429) {
+          throw new Error('Rate limit exceeded. Please try again later.');
+        }
         throw new Error(data.message || 'Failed to evaluate answer');
       }
 
-      setFeedback(data.data);
+      setEvaluation(data.evaluation);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to evaluate answer');
       console.error(err);
@@ -123,7 +125,8 @@ export default function InterviewPrep() {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
       setAnswer('');
-      setFeedback(null);
+      setEvaluation(null);
+      setError('');
     }
   };
 
@@ -131,257 +134,266 @@ export default function InterviewPrep() {
     if (currentQuestionIndex > 0) {
       setCurrentQuestionIndex(currentQuestionIndex - 1);
       setAnswer('');
-      setFeedback(null);
+      setEvaluation(null);
+      setError('');
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-          {/* Hero Section */}
-      <div className="bg-gradient-to-r from-purple-600 to-indigo-700 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-4xl font-bold mb-2">AI Interview Prep</h1>
-          <p className="text-purple-100 text-lg">
-            Practice with AI-generated questions and get instant feedback
-          </p>
-        </div>
+  const resetInterview = () => {
+    setQuestions([]);
+    setCurrentQuestionIndex(0);
+    setAnswer('');
+    setEvaluation(null);
+    setError('');
+    setRole('');
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return 'text-green-600 bg-green-100';
+    if (score >= 60) return 'text-yellow-600 bg-yellow-100';
+    return 'text-red-600 bg-red-100';
+  };
+
+  console.log("questions || questions.length === 0", questions, questions?.length === 0, questions);
+
+ return (
+  <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50">
+    {/* Hero Section */}
+    <div className="bg-gradient-to-r from-purple-600 to-blue-700 text-white py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-4xl font-bold mb-2">AI Interview Prep</h1>
+        <p className="text-purple-100 text-lg">
+          Practice with AI-generated questions and get real-time feedback
+        </p>
       </div>
+    </div>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {questions.length === 0 ? (
-          /* Setup Card */
-          <Card className="max-w-2xl mx-auto">
-            <CardHeader>
-              <CardTitle>Configure Your Interview Practice</CardTitle>
-              <CardDescription>
-                Select your target role and difficulty level to generate practice questions
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="role">Target Role</Label>
-                <Select value={role} onValueChange={setRole}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Frontend Developer">Frontend Developer</SelectItem>
-                    <SelectItem value="Backend Developer">Backend Developer</SelectItem>
-                    <SelectItem value="Full-Stack Developer">Full-Stack Developer</SelectItem>
-                    <SelectItem value="DevOps Engineer">DevOps Engineer</SelectItem>
-                    <SelectItem value="Data Engineer">Data Engineer</SelectItem>
-                    <SelectItem value="Mobile Developer">Mobile Developer</SelectItem>
-                  </SelectContent>
-                </Select>
+
+    {/* Main Content */}
+    {/* Main Content */}
+<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+ 
+  {Array.isArray(questions) && questions.length > 0 ? (
+    // Interview Phase
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Left: Question & Answer */}
+      <div className="space-y-6">
+        <Card>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle>Question {currentQuestionIndex + 1} of {questions.length}</CardTitle>
+                <CardDescription>{role} - {difficulty} level</CardDescription>
               </div>
+              <Badge variant="outline">
+                {questions[currentQuestionIndex]?.category || 'General'}
+              </Badge>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="bg-purple-50 p-4 rounded-lg">
+              <p className="text-lg font-medium text-gray-900">
+                {questions[currentQuestionIndex]?.question || 'Loading question...'}
+              </p>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="difficulty">Difficulty Level</Label>
-                <Select value={difficulty} onValueChange={setDifficulty}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select difficulty" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Junior">Junior (0-2 years)</SelectItem>
-                    <SelectItem value="Mid-Level">Mid-Level (2-5 years)</SelectItem>
-                    <SelectItem value="Senior">Senior (5+ years)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="answer">Your Answer</Label>
+              <Textarea
+                id="answer"
+                placeholder="Type your answer here... Be specific and provide examples."
+                className="min-h-[200px]"
+                value={answer}
+                onChange={(e) => setAnswer(e.target.value)}
+                disabled={evaluating}
+              />
+              <p className="text-xs text-gray-500">
+                {answer.length} characters (minimum 50 recommended)
+              </p>
+            </div>
 
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+
+            <div className="flex gap-2">
               <Button
-                onClick={generateQuestions}
-                disabled={loading || !role || !difficulty}
-                className="w-full"
-                size="lg"
+                onClick={evaluateAnswer}
+                disabled={evaluating || answer.length < 10}
+                className="flex-1"
               >
-                {loading ? (
+                {evaluating ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Generating Questions...
+                    Evaluating...
                   </>
                 ) : (
-                  'Generate Interview Questions'
+                  'Evaluate Answer'
                 )}
               </Button>
+              <Button variant="outline" onClick={resetInterview}>
+                New Interview
+              </Button>
+            </div>
 
-              {error && (
-                <Alert variant="destructive">
-                  <AlertDescription>{error}</AlertDescription>
-                </Alert>
-              )}
+            {/* Navigation */}
+            <div className="flex justify-between pt-4 border-t">
+              <Button
+                variant="outline"
+                onClick={previousQuestion}
+                disabled={currentQuestionIndex === 0}
+              >
+                Previous
+              </Button>
+              <Button
+                variant="outline"
+                onClick={nextQuestion}
+                disabled={currentQuestionIndex === questions.length - 1}
+              >
+                Next Question
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Right: Evaluation Results */}
+      <div>
+        {evaluation ? (
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Evaluation</CardTitle>
+              <CardDescription>Here&apos;s how you did</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Score */}
+              <div className="text-center">
+                <div className={`inline-block text-5xl font-bold px-8 py-4 rounded-lg ${getScoreColor(evaluation.score)}`}>
+                  {evaluation.score}/100
+                </div>
+              </div>
+
+              {/* Strengths */}
+              <div>
+                <h3 className="font-semibold text-green-600 mb-2 flex items-center gap-2">
+                  <CheckCircle2 className="h-5 w-5" />
+                  Strengths
+                </h3>
+                <ul className="space-y-2">
+                  {evaluation.strengths.map((strength, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <span className="text-green-600 mt-1">•</span>
+                      <span>{strength}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Improvements */}
+              <div>
+                <h3 className="font-semibold text-orange-600 mb-2 flex items-center gap-2">
+                  <XCircle className="h-5 w-5" />
+                  Areas for Improvement
+                </h3>
+                <ul className="space-y-2">
+                  {evaluation.improvements.map((improvement, index) => (
+                    <li key={index} className="flex items-start gap-2 text-sm">
+                      <span className="text-orange-600 mt-1">•</span>
+                      <span>{improvement}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Feedback */}
+              <div>
+                <h3 className="font-semibold text-blue-600 mb-2 flex items-center gap-2">
+                  <Lightbulb className="h-5 w-5" />
+                  Detailed Feedback
+                </h3>
+                <p className="text-sm text-gray-700 whitespace-pre-line">
+                  {evaluation.feedback}
+                </p>
+              </div>
             </CardContent>
           </Card>
         ) : (
-          /* Interview Questions */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Question Card */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle>
-                    Question {currentQuestionIndex + 1} of {questions.length}
-                  </CardTitle>
-                  <span className="text-sm font-medium px-3 py-1 bg-purple-100 text-purple-700 rounded-full">
-                    {questions[currentQuestionIndex].difficulty}
-                  </span>
-                </div>
-                <CardDescription>
-                  Category: {questions[currentQuestionIndex].category}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-lg font-medium text-gray-800">
-                    {questions[currentQuestionIndex].question}
-                  </p>
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="answer">Your Answer</Label>
-                  <Textarea
-                    id="answer"
-                    placeholder="Type your answer here..."
-                    className="min-h-[200px]"
-                    value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
-                  />
-                </div>
-
-                <div className="flex gap-3">
-                  <Button
-                    onClick={evaluateAnswer}
-                    disabled={evaluating || !answer.trim()}
-                    className="flex-1"
-                  >
-                    {evaluating ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Evaluating...
-                      </>
-                    ) : (
-                      'Get AI Feedback'
-                    )}
-                  </Button>
-                </div>
-
-                <div className="flex justify-between">
-                  <Button
-                    onClick={previousQuestion}
-                    disabled={currentQuestionIndex === 0}
-                    variant="outline"
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    onClick={nextQuestion}
-                    disabled={currentQuestionIndex === questions.length - 1}
-                    variant="outline"
-                  >
-                    Next Question
-                  </Button>
-                </div>
-
-                {error && (
-                  <Alert variant="destructive">
-                    <AlertDescription>{error}</AlertDescription>
-                  </Alert>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Feedback Card */}
-            <Card>
-              <CardHeader>
-                <CardTitle>AI Feedback</CardTitle>
-                <CardDescription>
-                  Detailed evaluation of your answer
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {!feedback && !evaluating && (
-                  <div className="text-center text-gray-500 py-16">
-                    <div className="text-6xl mb-4">🎯</div>
-                    <p className="text-lg font-medium">No feedback yet</p>
-                    <p className="text-sm mt-2">
-                      Answer the question and click &quot;Get AI Feedback&quot;
-                    </p>
-                  </div>
-                )}
-
-                {evaluating && (
-                  <div className="text-center py-16">
-                    <Loader2 className="h-12 w-12 animate-spin text-purple-600 mx-auto" />
-                    <p className="mt-4 text-gray-600 font-medium">
-                      Evaluating your answer...
-                    </p>
-                  </div>
-                )}
-
-                {feedback && (
-                  <div className="space-y-6">
-                    {/* Score */}
-                    <div className="text-center p-6 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg">
-                      <div className={`text-6xl font-bold ${
-                        feedback.score >= 80 ? 'text-green-600' :
-                        feedback.score >= 60 ? 'text-blue-600' :
-                        feedback.score >= 40 ? 'text-orange-600' : 'text-red-600'
-                      }`}>
-                        {feedback.score}
-                      </div>
-                      <p className="text-gray-600 font-medium mt-2">Answer Score</p>
-                    </div>
-
-                    {/* Strengths */}
-                    <div className="space-y-3">
-                      <h3 className="font-semibold text-lg flex items-center gap-2">
-                        <CheckCircle className="text-green-600 h-5 w-5" />
-                        What You Did Well
-                      </h3>
-                      <ul className="space-y-2">
-                        {feedback.strengths.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-gray-700 bg-green-50 p-3 rounded-lg">
-                            <span className="text-green-600 font-bold">•</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Improvements */}
-                    <div className="space-y-3">
-                      <h3 className="font-semibold text-lg flex items-center gap-2">
-                        <XCircle className="text-orange-600 h-5 w-5" />
-                        Areas to Improve
-                      </h3>
-                      <ul className="space-y-2">
-                        {feedback.improvements.map((item, i) => (
-                          <li key={i} className="flex items-start gap-2 text-sm text-gray-700 bg-orange-50 p-3 rounded-lg">
-                            <span className="text-orange-600 font-bold">•</span>
-                            <span>{item}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    {/* Suggestion */}
-                    <div className="space-y-3">
-                      <h3 className="font-semibold text-lg flex items-center gap-2">
-                        <span className="text-purple-600 text-xl">💡</span>
-                        Model Answer / Suggestion
-                      </h3>
-                      <div className="text-sm text-gray-700 bg-purple-50 p-4 rounded-lg whitespace-pre-line">
-                        {feedback.suggestion}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </div>
+          <Card>
+            <CardContent className="py-12 text-center">
+              <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-gray-600">Answer the question and click &quot;Evaluate Answer&quot; to see AI feedback</p>
+            </CardContent>
+          </Card>
         )}
       </div>
     </div>
-  );
+  ) : (
+    // Setup Phase
+    <div className="max-w-2xl mx-auto">
+      <Card>
+        <CardHeader>
+          <CardTitle>Configure Your Interview</CardTitle>
+          <CardDescription>
+            Choose a role and difficulty level to get started
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="role">Job Role *</Label>
+            <Input
+              id="role"
+              placeholder="e.g., Senior Frontend Developer"
+              value={role}
+              onChange={(e) => setRole(e.target.value)}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="difficulty">Difficulty Level</Label>
+            <Select value={difficulty} onValueChange={setDifficulty}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="entry">Entry Level</SelectItem>
+                <SelectItem value="mid">Mid Level</SelectItem>
+                <SelectItem value="senior">Senior Level</SelectItem>
+                <SelectItem value="expert">Expert Level</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          <Button
+            onClick={generateQuestions}
+            disabled={loading}
+            className="w-full"
+            size="lg"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating Questions...
+              </>
+            ) : (
+              <>
+                <Target className="mr-2 h-4 w-4" />
+                Generate Interview Questions
+              </>
+            )}
+          </Button>
+        </CardContent>
+      </Card>
+    </div>
+  )}
+</div>
+  </div>
+);
 }
