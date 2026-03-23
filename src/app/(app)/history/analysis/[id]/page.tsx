@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowLeft, Calendar, Target, Loader2, AlertCircle } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { API_BASE_URL } from '@/utils/contants';
 
 interface AnalysisDetail {
   id: string;
@@ -35,7 +36,7 @@ export default function AnalysisDetailPage() {
 
   const fetchAnalysis = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/resume/analysis/${params.id}`);
+      const response = await fetch(`${API_BASE_URL}/api/resume/analysis/${params.id}`);
 
       if (!response.ok) {
         throw new Error('Analysis not found');

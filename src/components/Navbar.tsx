@@ -213,7 +213,7 @@ export default function Navbar() {
             ) : session ? (
               <>
                 <Link href="/history">
-                  <Button variant="ghost" size="sm">
+                  <Button variant="ghost" size="sm" className="text-gray-700 hover:text-blue-600 px-3 py-2 text-sm font-medium">
                     <History className="h-4 w-4 mr-2" />
                     History
                   </Button>

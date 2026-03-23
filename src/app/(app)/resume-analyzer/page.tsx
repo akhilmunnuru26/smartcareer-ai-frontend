@@ -17,6 +17,7 @@ import { Loader2 } from "lucide-react";
 import FileUpload from "@/components/FileUpload";
 import { useSession } from "next-auth/react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { API_BASE_URL } from "@/utils/contants";
 
 interface AnalysisResult {
   overallScore: number;
@@ -47,7 +48,7 @@ export default function Home() {
     // console.log("🔍 Analyzing with userId:", session?.user?.id); // Add this debug log
 
     try {
-      const response = await fetch("http://localhost:5000/api/resume/analyze", {
+      const response = await fetch(`${API_BASE_URL}/api/resume/analyze`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
