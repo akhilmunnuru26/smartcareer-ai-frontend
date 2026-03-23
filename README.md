@@ -2,7 +2,7 @@
 
 > AI-powered career assistant for resume analysis, interview prep, and job matching
 
-🚀 **Live Demo:** [smartcareer-ai.vercel.app](update it later)
+🚀 **Live Demo:** https://smartcareer-ai.vercel.app/
 
 ## Tech Stack
 - **Frontend:** Next.js 15, TypeScript, Tailwind CSS, shadcn/ui
@@ -18,8 +18,7 @@
 -
 
 ## Running Locally
-[Installation instructions...]
+- npm install
 
----
 
 **Note:** This is a portfolio project. Not intended for commercial use without proper licensing.

@@ -16,6 +16,22 @@ interface ResumeAnalysisItem {
   createdAt: string;
 }
 
+interface InterviewSessionItem {
+  id: string;
+  role: string;
+  difficulty: string;
+  questionsAnswered: number;
+  averageScore: number | null;
+  createdAt: string;
+}
+
+interface JobMatchItem {
+  id: string;
+  jobTitle: string;
+  matchPercentage: number;
+  createdAt: string;
+}
+
 interface Pagination {
   page: number;
   limit: number;
@@ -24,135 +40,83 @@ interface Pagination {
 }
 
 export default function HistoryPage() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
+  
   const [resumeHistory, setResumeHistory] = useState<ResumeAnalysisItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [interviewHistory, setInterviewHistory] = useState<InterviewSessionItem[]>([]);
+  const [jobMatchHistory, setJobMatchHistory] = useState<JobMatchItem[]>([]);
+  
+  const [loadingResumes, setLoadingResumes] = useState(true);
+  const [loadingInterviews, setLoadingInterviews] = useState(true);
+  const [loadingJobs, setLoadingJobs] = useState(true);
+  
   const [error, setError] = useState('');
-  const [pagination, setPagination] = useState<Pagination>({
-    page: 1,
-    limit: 10,
-    total: 0,
-    totalPages: 0,
-  });
-
-  // Debug: Log session
-  useEffect(() => {
-    console.log('🔍 Session status:', status);
-    console.log('🔍 Session data:', session);
-    console.log('🔍 User ID:', session?.user?.id);
-  }, [session, status]);
 
   useEffect(() => {
-    if (status === 'loading') {
-      console.log('⏳ Waiting for session to load...');
-      return;
+    if (session?.user?.id) {
+      fetchResumeHistory();
+      fetchInterviewHistory();
+      fetchJobMatchHistory();
     }
+  }, [session]);
 
-    if (!session?.user?.id) {
-      console.log('❌ No user ID found in session');
-      setError('Please sign in to view history');
-      setLoading(false);
-      return;
-    }
-
-    console.log('✅ User ID found, fetching history...');
-    fetchHistory();
-  }, [session, status, pagination.page]);
-
-  // const fetchHistory = async () => {
-  //   if (!session?.user?.id) {
-  //     console.log('❌ Cannot fetch - no user ID');
-  //     setError('Please sign in to view history');
-  //     setLoading(false);
-  //     return;
-  //   }
-
-  //   try {
-  //     setLoading(true);
-  //     const url = `http://localhost:5000/api/resume/history/${session.user.id}?page=${pagination.page}&limit=${pagination.limit}`;
-      
-  //     console.log('📡 Fetching from:', url);
-      
-  //     const response = await fetch(url);
-      
-  //     console.log('📡 Response status:', response.status);
-
-  //     if (!response.ok) {
-  //       throw new Error('Failed to fetch history');
-  //     }
-
-  //     const data = await response.json();
-  //     console.log('📊 History data:', data);
-      
-  //     setResumeHistory(data.data);
-  //     setPagination(data.pagination);
-  //     setError('');
-  //   } catch (err) {
-  //     console.error('❌ Fetch history error:', err);
-  //     setError(err instanceof Error ? err.message : 'Failed to load history');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-const fetchHistory = async () => {
-  if (!session?.user?.id) {
-    console.log('❌ Cannot fetch - no user ID');
-    setError('Please sign in to view history');
-    setLoading(false);
-    return;
-  }
-
-  try {
-    setLoading(true);
-    const url = `http://localhost:5000/api/resume/history/${session.user.id}?page=${pagination.page}&limit=${pagination.limit}`;
-    
-    // console.log('📡 Fetching from:', url);
-    
-    const response = await fetch(url);
-    
-    console.log('📡 Response status:', response.status);
-
-    if (!response.ok) {
-      throw new Error('Failed to fetch history');
-    }
-
-    const data = await response.json();
-    console.log('📊 Full response:', JSON.stringify(data, null, 2)); // More detailed log
-    console.log('📊 Data array:', data.data);
-    console.log('📊 Data length:', data.data?.length);
-    console.log('📊 Pagination:', data.pagination);
-    
-    setResumeHistory(data.data || []); // Add fallback
-    setPagination(data.pagination);
-    setError('');
-  } catch (err) {
-    console.error('❌ Fetch history error:', err);
-    setError(err instanceof Error ? err.message : 'Failed to load history');
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const deleteAnalysis = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this analysis?')) {
-      return;
-    }
+  const fetchResumeHistory = async () => {
+    if (!session?.user?.id) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/resume/analysis/${id}`, {
-        method: 'DELETE',
-      });
+      setLoadingResumes(true);
+      const response = await fetch(
+        `http://localhost:5000/api/resume/history/${session.user.id}?page=1&limit=10`
+      );
 
-      if (!response.ok) {
-        throw new Error('Failed to delete analysis');
+      if (response.ok) {
+        const data = await response.json();
+        setResumeHistory(data.data);
       }
-
-      // Refresh history
-      fetchHistory();
     } catch (err) {
-      alert('Failed to delete analysis');
-      console.error('Delete error:', err);
+      console.error('Fetch resume history error:', err);
+    } finally {
+      setLoadingResumes(false);
+    }
+  };
+
+  const fetchInterviewHistory = async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      setLoadingInterviews(true);
+      const response = await fetch(
+        `http://localhost:5000/api/interview/history/${session.user.id}?page=1&limit=10`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setInterviewHistory(data.data);
+      }
+    } catch (err) {
+      console.error('Fetch interview history error:', err);
+    } finally {
+      setLoadingInterviews(false);
+    }
+  };
+
+  const fetchJobMatchHistory = async () => {
+    if (!session?.user?.id) return;
+
+    try {
+      setLoadingJobs(true);
+      const response = await fetch(
+        `http://localhost:5000/api/job/history/${session.user.id}?page=1&limit=10`
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setJobMatchHistory(data.data);
+      }
+    } catch (err) {
+      console.error('Fetch job match history error:', err);
+    } finally {
+      setLoadingJobs(false);
     }
   };
 
@@ -166,32 +130,6 @@ const fetchHistory = async () => {
     });
   };
 
-  // Show loading while checking auth
-  if (status === 'loading') {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Card>
-          <CardContent className="py-12 text-center">
-            <Loader2 className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-spin" />
-            <p className="text-gray-600">Checking authentication...</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Show error if not authenticated
-  if (!session) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>Please sign in to view your history</AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       <div className="mb-8">
@@ -199,26 +137,24 @@ const fetchHistory = async () => {
         <p className="text-xl text-gray-600">
           Review your past analyses and track your progress
         </p>
-        
       </div>
 
-      {error && (
-        <Alert variant="destructive" className="mb-6">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      <Tabs defaultValue="resume" className="space-y-6 flex flex-col">
-        <TabsList className="grid w-[50%] max-w-md grid-cols-3">
-          <TabsTrigger value="resume">Resume</TabsTrigger>
-          <TabsTrigger value="interview">Interview</TabsTrigger>
-          <TabsTrigger value="jobs">Job Match</TabsTrigger>
+      <Tabs defaultValue="resume" className="flex flex-col">
+        <TabsList className="space-x-4 bg-tra">
+          <TabsTrigger value="resume" className="bg-transparent border-b-2 border-gray-300 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600">
+            Resume ({resumeHistory.length})
+          </TabsTrigger>
+          <TabsTrigger value="interview" className="bg-transparent border-b-2 border-gray-300 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600"  >
+            Interview ({interviewHistory.length})
+          </TabsTrigger>
+          <TabsTrigger value="jobs" className="bg-transparent border-b-2 border-gray-300 data-[state=active]:border-blue-600 data-[state=active]:text-blue-600">
+            Jobs ({jobMatchHistory.length})
+          </TabsTrigger>
         </TabsList>
 
         {/* Resume History */}
         <TabsContent value="resume" className="space-y-4">
-          {loading ? (
+          {loadingResumes ? (
             <Card>
               <CardContent className="py-12 text-center">
                 <Loader2 className="h-12 w-12 text-blue-600 mx-auto mb-4 animate-spin" />
@@ -239,132 +175,168 @@ const fetchHistory = async () => {
               </CardContent>
             </Card>
           ) : (
-            <>
-              {resumeHistory.map((item) => (
-                <Card key={item.id} className="hover:shadow-lg transition-shadow">
-                  <CardHeader>
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-4">
-                        <div className="bg-blue-100 p-3 rounded-lg">
-                          <FileText className="h-6 w-6 text-blue-600" />
-                        </div>
-                        <div>
-                          <CardTitle className="text-lg">
-                            {item.targetRole || 'Resume Analysis'}
-                          </CardTitle>
-                          <CardDescription className="flex items-center gap-2 mt-1">
-                            <Clock className="h-4 w-4" />
-                            {formatDate(item.createdAt)}
-                          </CardDescription>
-                        </div>
+            resumeHistory.map((item) => (
+              <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-blue-100 p-3 rounded-lg">
+                        <FileText className="h-6 w-6 text-blue-600" />
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary" className="text-lg font-bold">
-                          {item.overallScore}/100
-                        </Badge>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => deleteAnalysis(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-600" />
-                        </Button>
+                      <div>
+                        <CardTitle className="text-lg">
+                          {item.targetRole || 'Resume Analysis'}
+                        </CardTitle>
+                        <CardDescription className="flex items-center gap-2 mt-1">
+                          <Clock className="h-4 w-4" />
+                          {formatDate(item.createdAt)}
+                        </CardDescription>
                       </div>
                     </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm text-gray-600">
-                        Score: <span className="font-medium">{item.overallScore}/100</span>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => window.location.href = `/history/analysis/${item.id}`}
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-
-              {/* Pagination */}
-              {pagination.totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-6">
+                    <Badge variant="secondary" className="text-lg font-bold">
+                      {item.overallScore}/100
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
                   <Button
                     variant="outline"
-                    onClick={() => setPagination({ ...pagination, page: pagination.page - 1 })}
-                    disabled={pagination.page === 1}
+                    size="sm"
+                    onClick={() => window.location.href = `/history/analysis/${item.id}`}
                   >
-                    Previous
+                    View Details
                   </Button>
-                  <span className="text-sm text-gray-600">
-                    Page {pagination.page} of {pagination.totalPages}
-                  </span>
-                  <Button
-                    variant="outline"
-                    onClick={() => setPagination({ ...pagination, page: pagination.page + 1 })}
-                    disabled={pagination.page === pagination.totalPages}
-                  >
-                    Next
-                  </Button>
-                </div>
-              )}
-            </>
+                </CardContent>
+              </Card>
+            ))
           )}
         </TabsContent>
 
-        {/* Interview History - Coming Soon */}
-        <TabsContent value="interview">
-          <Card>
-            <CardContent className="py-12 text-center">
-              <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-2">Interview history coming soon</p>
-              <p className="text-sm text-gray-500">
-                Practice interviews to see your history here
-              </p>
-            </CardContent>
-          </Card>
+        {/* Interview History */}
+        <TabsContent value="interview" className="space-y-4">
+          {loadingInterviews ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Loader2 className="h-12 w-12 text-purple-600 mx-auto mb-4 animate-spin" />
+                <p className="text-gray-600">Loading history...</p>
+              </CardContent>
+            </Card>
+          ) : interviewHistory.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Target className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-2">No interview sessions yet</p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Start practicing to see your history here
+                </p>
+                <Button onClick={() => window.location.href = '/interview-prep'}>
+                  Start Interview Prep
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            interviewHistory.map((item) => (
+              <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-purple-100 p-3 rounded-lg">
+                        <Target className="h-6 w-6 text-purple-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">
+                          {item.role} Interview
+                        </CardTitle>
+                        <CardDescription className="flex items-center gap-2 mt-1">
+                          <Clock className="h-4 w-4" />
+                          {formatDate(item.createdAt)}
+                        </CardDescription>
+                      </div>
+                    </div>
+                    {item.averageScore && (
+                      <Badge variant="secondary" className="text-lg font-bold">
+                        {Math.round(item.averageScore)}/100
+                      </Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center justify-between">
+                    <div className="text-sm text-gray-600">
+                      <span className="font-medium">{item.difficulty}</span> level • {item.questionsAnswered} questions answered
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => window.location.href = `/history/interview/${item.id}`}
+                    >
+                      View Details
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </TabsContent>
 
-        {/* Job Match History - Coming Soon */}
-        <TabsContent value="jobs">
-          <Card>
-            <CardContent className="py-12 text-center">
-              <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 mb-2">Job match history coming soon</p>
-              <p className="text-sm text-gray-500">
-                Match job descriptions to see them here
-              </p>
-            </CardContent>
-          </Card>
+        {/* Job Match History */}
+        <TabsContent value="jobs" className="space-y-4">
+          {loadingJobs ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <Loader2 className="h-12 w-12 text-green-600 mx-auto mb-4 animate-spin" />
+                <p className="text-gray-600">Loading history...</p>
+              </CardContent>
+            </Card>
+          ) : jobMatchHistory.length === 0 ? (
+            <Card>
+              <CardContent className="py-12 text-center">
+                <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                <p className="text-gray-600 mb-2">No job matches yet</p>
+                <p className="text-sm text-gray-500 mb-4">
+                  Match a job description to see it here
+                </p>
+                <Button onClick={() => window.location.href = '/job-matcher'}>
+                  Match a Job
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            jobMatchHistory.map((item) => (
+              <Card key={item.id} className="hover:shadow-lg transition-shadow">
+                <CardHeader>
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-start gap-4">
+                      <div className="bg-green-100 p-3 rounded-lg">
+                        <TrendingUp className="h-6 w-6 text-green-600" />
+                      </div>
+                      <div>
+                        <CardTitle className="text-lg">{item.jobTitle}</CardTitle>
+                        <CardDescription className="flex items-center gap-2 mt-1">
+                          <Clock className="h-4 w-4" />
+                          {formatDate(item.createdAt)}
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <Badge variant="secondary" className="text-lg font-bold">
+                      {item.matchPercentage}%
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => window.location.href = `/history/job/${item.id}`}
+                  >
+                    View Details
+                  </Button>
+                </CardContent>
+              </Card>
+            ))
+          )}
         </TabsContent>
       </Tabs>
     </div>
   );
 }
-// ```
-
-// ---
-
-// ## **Step 2: Check Browser Console**
-
-// 1. Open browser DevTools (F12)
-// 2. Go to Console tab
-// 3. Refresh the history page
-// 4. Look for the debug logs starting with 🔍, 📡, 📊
-
-// **Tell me what you see in the console:**
-// - What is the session status?
-// - What is session.user.id?
-// - What URL is it trying to fetch from?
-// - What's the response?
-
-// ---
-
-// ## **Step 3: Check Backend Logs**
-
-// While the history page is open, check your backend terminal for logs. You should see something like:
-// ```
-// GET /api/resume/history/[some-id]?page=1&limit=10
